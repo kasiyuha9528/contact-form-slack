@@ -26,8 +26,8 @@
 | 1 | Next.jsプロジェクトの作成 | 完了 |
 | 2 | フォーム画面の作成(name / email / message) | 完了 |
 | 3 | zodスキーマの作成とバリデーション | 完了 |
-| 4 | Slack Incoming Webhookへの通知処理(サーバー側) | 未着手 |
-| 5 | 環境変数でWebhook URLを管理 | 未着手 |
+| 4 | Slack Incoming Webhookへの通知処理(サーバー側) | 完了 |
+| 5 | 環境変数でWebhook URLを管理 | 完了 |
 | 6 | 動作確認(空欄、メール形式不正、送信成功) | 未着手 |
 | 7 | Vercelへのデプロイ | 未着手 |
 | 8 | README.mdと学習ノートの仕上げ | 未着手 |
@@ -59,10 +59,37 @@
 - エラーで再表示するときは、入力値を返して `defaultValue` に入れないと、入力内容が消える
 - ライブラリは、バージョンで書き方が変わる。使う前に、入っているバージョンと型定義を確認する
 
+### ステップ4:Slack通知
+- Incoming Webhookは、URLにJSONをPOSTするだけで、Slackに投稿できる仕組み
+- 通知は Block Kit で整形できる。`text` は、通知のプレビューなどに出る代わりの文章として付ける
+- ユーザーの入力をSlackに送る前に、`&` `<` `>` をエスケープする。`<!channel>` による意図しない全員メンションを防ぐため
+- 外部サービスとの通信は、失敗や無応答を前提に作る(`response.ok`、`AbortSignal.timeout`、`try/catch`)
+- Slackへの通知が失敗したときは、「成功」と見せずにエラーを出す。詳しい原因は、サーバーのログにだけ残す
+- サーバーの時刻は日本時間とは限らないので、`timeZone: "Asia/Tokyo"` を明示する
+
+### ステップ5:環境変数(Webhook URLの管理)
+- 秘密情報はコードに書かず、環境変数(`.env.local`)に入れる
+- `NEXT_PUBLIC_` で始まらない環境変数は、ブラウザに公開されない
+- `.env.local` はGitの管理外にする。ひな形の `.env.example` は管理に入れる(`.gitignore` に `!` で例外を書く)
+- 環境変数は起動時に読み込まれるため、変更したら開発サーバーを再起動する
+- Slackなど外部サービスの画面は変わることがある。手順書と違うときは、画面を見て判断する
+
 ## 開発の始め方
 
 ```bash
 npm install
+```
+
+次に、環境変数のファイルを用意します。
+
+```bash
+Copy-Item .env.example .env.local    # PowerShellの場合
+```
+
+`.env.local` を開き、`SLACK_WEBHOOK_URL=` の右側に、Slack Incoming Webhook のURLを貼ります。
+`.env.local` はGitの管理対象外です。URLを、チャットやコードに貼らないでください。
+
+```bash
 npm run dev
 ```
 

@@ -30,4 +30,6 @@ export type ContactFormState = {
   errors: Partial<Record<keyof ContactInput, string[]>>;
   // 入力欄に残しておく値(エラー時に、入力した内容が消えないようにするため)
   values: ContactInput;
+  // 項目ごとではない、全体のエラー(例:Slackへの通知に失敗したとき)
+  formError?: string;
 };

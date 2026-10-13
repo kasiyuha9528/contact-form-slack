@@ -72,7 +72,7 @@ export function ContactForm() {
           name="name"
           type="text"
           autoComplete="name"
-          placeholder="山田 太郎"
+          placeholder="田中　一郎"
           // defaultValue:エラーで再表示されても、入力した内容が消えないようにする
           defaultValue={values.name}
           // aria-invalid / aria-describedby:スクリーンリーダーに、エラーの有無と内容を伝える
@@ -120,6 +120,16 @@ export function ContactForm() {
         <FieldError id="message-error" messages={errors.message} />
       </div>
 
+      {/* 項目ごとではない、全体のエラー(Slack通知の失敗など) */}
+      {state.formError && (
+        <p
+          role="alert"
+          className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 dark:bg-red-950 dark:text-red-200"
+        >
+          {state.formError}
+        </p>
+      )}
+
       <button
         type="submit"
         disabled={pending}
@@ -128,14 +138,13 @@ export function ContactForm() {
         {pending ? "送信中…" : "送信する"}
       </button>
 
-      {/* 入力チェックを通過したときのメッセージ。
-          ステップ4でSlack通知を追加するまでは、確認用の仮の表示。 */}
+      {/* 送信に成功したときのメッセージ */}
       {state.status === "success" && (
         <p
           role="status"
           className="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200"
         >
-          入力内容の確認が完了しました。
+          お問い合わせを受け付けました。ありがとうございます。
         </p>
       )}
     </form>

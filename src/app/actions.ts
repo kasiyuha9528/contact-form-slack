@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { contactSchema, type ContactFormState } from "@/lib/contact-schema";
+import { sendSlackNotification } from "@/lib/slack";
 
 // フォームの「送信する」を押したときに、サーバー側で実行される関数(Server Action)。
 // 第1引数 _prevState は、前回の結果。useActionState を使うと自動で渡される(今回は使わない)。
@@ -30,7 +31,25 @@ export async function submitContact(
     };
   }
 
-  // ステップ4で、ここにSlackへの通知処理を追加する。
+  // チェックを通過したので、Slackに通知する。
+  // result.data は、前後の空白を取り除いた後の、正しい形のデータ。
+  try {
+    await sendSlackNotification(result.data);
+  } catch (error) {
+    // 詳しい原因は、サーバー側のログにだけ残す(ユーザーには見せない)。
+    // error 全体ではなく message だけを出し、秘密情報が混ざらないようにしている。
+    console.error(
+      "Slack通知エラー:",
+      error instanceof Error ? error.message : "不明なエラー",
+    );
+    return {
+      status: "error",
+      errors: {},
+      values, // 入力内容は残して、もう一度送れるようにする
+      formError:
+        "送信できませんでした。お手数ですが、しばらくしてからもう一度お試しください。",
+    };
+  }
 
   return {
     status: "success",
